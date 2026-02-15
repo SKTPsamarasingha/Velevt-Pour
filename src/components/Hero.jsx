@@ -3,8 +3,13 @@ import {SplitText} from "gsap/all";
 import {useGSAP} from '@gsap/react'
 
 import gsap from "gsap";
+import {useRef} from "react";
+import {useMediaQuery} from "react-responsive";
 
 export const Hero = () => {
+    const videoRef = useRef()
+    const isMobile = useMediaQuery({maxWidth: 767})
+
     useGSAP(() => {
         document.fonts.ready.then(() => {
             const heroSplit = new SplitText('.title', {type: "chars, words"})
@@ -28,34 +33,65 @@ export const Hero = () => {
         }).to('.right-leaf', {y: 300}, 0)
             .to('.left-leaf', {y: -300}, 0)
 
+        const startValues = isMobile ? "top 50%" : "center 60%"
+        const endValues = isMobile ? "120% top" : "bottom top"
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: 'video',
+                start: startValues,
+                end: endValues,
+                scrub: true,
+                pin: true
+            }
+        })
+
+        videoRef.current.onloadedmetadata = () => {
+            tl.to(videoRef.current, {
+                currentTime: videoRef.current.duration,
+            })
+        }
+
     }, [])
 
 
-    return (<section id='hero' className='noisy'>
-        <h1 className='title'>MOJITO</h1>
+    return (<>
+        <section id='hero' className='noisy'>
+            <h1 className='title'>MOJITO</h1>
 
-        <img src="/images/hero-left-leaf.png" alt='left-leaf' className='left-leaf'/>
-        <img src="/images/hero-right-leaf.png" alt='right-leaf' className='right-leaf'/>
+            <img src="/images/hero-left-leaf.png" alt='left-leaf' className='left-leaf'/>
+            <img src="/images/hero-right-leaf.png" alt='right-leaf' className='right-leaf'/>
 
-        <div className='body'>
-            <div className='content'>
-                <div className='space-y-5 md:block'>
-                    <p>Cool. Crisp. Classic.</p>
-                    <p className='subtitle'>
-                        Sip the Spirit <br/> of Summer
-                    </p>
-                </div>
+            <div className='body'>
+                <div className='content'>
+                    <div className='space-y-5 md:block'>
+                        <p>Cool. Crisp. Classic.</p>
+                        <p className='subtitle'>
+                            Sip the Spirit <br/> of Summer
+                        </p>
+                    </div>
 
 
-                <div className={'view-cocktails'}>
-                    <p className='subtitle'>{heroCocktailPhr}
-                    </p>
-                    <a href="#cocktails">View Cocktails</a>
+                    <div className={'view-cocktails'}>
+                        <p className='subtitle'>{heroCocktailPhr}
+                        </p>
+                        <a href="#cocktails">View Cocktails</a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </section>)
+        </section>
+
+        <div className="video absolute inset-0">
+            <video
+                ref={videoRef}
+                muted
+                playsInline
+                preload="auto"
+                src="/videos/output.mp4"
+            />
+        </div>
+    </>)
 }
 
 export default Hero
